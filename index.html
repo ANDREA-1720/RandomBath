@@ -1,0 +1,195 @@
+<html>
+    <head>
+        <title>3ESA - bagni</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f5f5f5;
+            }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        table {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .unassigned {
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+        }
+        
+        .unassigned h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        
+        .unassigned-list {
+            color: #856404;
+        }
+        
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    </head>
+    <body>
+        <h1>3ESA - Assegnazione Bagni</h1>
+        
+        <button onclick="generatePairs()">Genera Nuove Coppie</button>
+        
+        <table id="table">
+            <thead>
+                <tr>
+                    <th scope="col">Persona 1</th>
+                    <th scope="col">Persona 2</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+        
+        <div id="unassigned" class="unassigned" style="display: none;">
+            <h3>Persone non assegnate:</h3>
+            <div id="unassignedList" class="unassigned-list"></div>
+        </div>
+
+        <script>
+            const gruppi = {
+                "Acquaviva Marco": [],
+                "Anguilano Mariarita": ["Benedetta Crudo", "Laura Nasuto"],
+                "Conte Fabio": [],
+                "Crudo Benedetta": ["Nasuto Laura", "Salerni Giada", "Anguilano Mariarita"],
+                "Di Ciommo": [],
+                "Goduti Simone": [],
+                "Landini Martina": [],
+                "Mancini Giorgia": [],
+                "Marchitelli Daniela": ["Conte Fabio"],
+                "Nasuto Laura": ["Salerni Giada", "Anguilano Mariarita", "Crudo Benedetta"],
+                "Pasqua Francesco": [],
+                "Rinaldi Raffaele": [],
+                "Rizzi Andrea": [],
+                "Russo Alessandro": ["Crudo Benedetta"],
+                "Russo Gaia": [],
+                "Russo Giorgia": ["Pasqua Francesco"],
+                "Salerni Giada": ["Nasuto Laura", "Anguilano Mariarita", "Crudo Benedetta"],
+                "Schena Alesio": []
+            };
+
+            function shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            function generatePairs() {
+                const tableBody = document.getElementById("tableBody");
+                const unassignedDiv = document.getElementById("unassigned");
+                const unassignedList = document.getElementById("unassignedList");
+                
+                // Clear previous results
+                tableBody.innerHTML = "";
+                unassignedDiv.style.display = "none";
+                unassignedList.innerHTML = "";
+
+                let bagnanti = [];
+                const persone = Object.keys(gruppi);
+                const shuffledPersone = shuffleArray(persone);
+
+                // First pass: pair people with preferences
+                for (const persona of shuffledPersone) {
+                    // Skip if this person has no possible partners or is already assigned
+                    if (gruppi[persona].length === 0) continue;
+                    if (bagnanti.includes(persona)) continue;
+
+                    let seconda = null;
+                    const possibilita = shuffleArray(gruppi[persona]);
+                    
+                    // Try to find an available partner
+                    for (const tentativo of possibilita) {
+                        if (!bagnanti.includes(tentativo)) {
+                            seconda = tentativo;
+                            break;
+                        }
+                    }
+                    
+                    // If no partner found, skip this person for now
+                    if (!seconda) continue;
+                    
+                    // Add both people to the assigned list
+                    bagnanti.push(persona);
+                    bagnanti.push(seconda);
+
+                    // Create table row
+                    const tr = document.createElement("tr");
+                    const td1 = document.createElement("td");
+                    const td2 = document.createElement("td");
+                    
+                    td1.innerText = persona;
+                    td2.innerText = seconda;
+                    
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tableBody.appendChild(tr);
+                }
+
+                // Show unassigned people if any
+                const nonAssegnati = persone.filter(persona => !bagnanti.includes(persona) && gruppi[persona].length !== 0);
+                if (nonAssegnati.length > 0) {
+                    unassignedDiv.style.display = "block";
+                    unassignedList.innerText = nonAssegnati.join(", ");
+                }
+            }
+
+            // Generate initial pairs when page loads
+            window.addEventListener('DOMContentLoaded', generatePairs);
+        </script>
+    </body>
+</html>
