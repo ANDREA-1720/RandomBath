@@ -181,7 +181,14 @@
                 }
 
                 // Show unassigned people if any
-                const nonAssegnati = persone.filter(persona => !bagnanti.includes(persona) && gruppi[persona].length !== 0);
+				const everyone = new Set()
+                for(const persona of persone){
+                    everyone.add(persona)
+                    for(const seconda of gruppi[persona]){
+                    	everyone.add(seconda)
+                    }
+                }
+                const nonAssegnati = [...everyone].filter(persona => !bagnanti.includes(persona) && gruppi[persona].length !== 0);
                 if (nonAssegnati.length > 0) {
                     unassignedDiv.style.display = "block";
                     unassignedList.innerText = nonAssegnati.join(", ");
